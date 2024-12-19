@@ -1,0 +1,19 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-Wall",
+      "-Wextra",
+      "-ggdb3",
+      "-I./include",
+      "-c",
+      "-o",
+      "src/lexer.o",
+      "src/lexer.c"
+    ],
+    "directory": "/home/Thunkpad/Documents/code/C/Projects/Lexer",
+    "file": "/home/Thunkpad/Documents/code/C/Projects/Lexer/src/lexer.c",
+    "output": "/home/Thunkpad/Documents/code/C/Projects/Lexer/src/lexer.o"
+  }
+]
