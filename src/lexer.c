@@ -36,7 +36,7 @@ void init_lexer(lexer* lexer, char* path) {
 void close_lexer(lexer *lex) {
     if (lex->tokens != NULL) {
         for (int i = 0; i < lex->token_count; i++) {
-            if (lex->tokens[i].literal != NULL){
+            if (lex->tokens[i].literal != NULL && lex->tokens[i].type != TOKEN_EOF){
                 free(lex->tokens[i].literal);
             }
         }
@@ -54,15 +54,20 @@ void close_lexer(lexer *lex) {
 void add_token(lexer *lex, int start, int length, t_type type) {
 
     if (type == TOKEN_EOF) {
-        lex->tokens[lex->token_count].type = type;
-        lex->tokens = realloc(lex->tokens, lex->token_count);
+        lex->token_count++;
+        lex->tokens = realloc(lex->tokens, lex->token_count * sizeof(token));
         if (lex->tokens == NULL) {
             fprintf(stderr, "Realloc failed in add_token!\n");
             lex->flag = ADD_TOKEN_FAILURE;
             return;
         }
 
+        lex->tokens[lex->token_count-1].type = TOKEN_EOF;
+        lex->tokens[lex->token_count-1].literal = NULL;
+        lex->tokens[lex->token_count-1].line = lex->line;
+        lex->tokens[lex->token_count-1].column = lex->column;
         lex->flag = SUCCESS_DONE;
+        return;
     }
 
     lex->tokens[lex->token_count].literal = malloc(length);
@@ -75,11 +80,11 @@ void add_token(lexer *lex, int start, int length, t_type type) {
     lex->tokens[lex->token_count].literal[length-1] = '\0';
     
     lex->tokens[lex->token_count].line = lex->line;
-    lex->tokens[lex->token_count].column = lex->column;
+    lex->tokens[lex->token_count].column = lex->column-(length-1);
     lex->tokens[lex->token_count].type = type;
     
     lex->token_count++;
-    if (lex->token_count > lex->token_limit){
+    if (lex->token_count > lex->token_limit - 1){
         lex->token_limit *= 2;
         lex->tokens = realloc(lex->tokens, sizeof(token) * lex->token_limit);
         if (lex->tokens == NULL) {
@@ -174,7 +179,7 @@ void tokenize(lexer* lex) {
         }
     } 
     
-    // // terminate tokens with EOF token
-    // add_token(lex, 0, 0, TOKEN_EOF);
+    // terminate tokens with EOF token
+    add_token(lex, 0, 0, TOKEN_EOF);
     lex->flag = SUCCESS_DONE;
 }

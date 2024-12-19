@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "utils.h"
 
+char* temp[] = {"Keyword", "Number", "Symbol", "EOF"};
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage:\n./lex <input.txt>\n");
@@ -17,13 +18,14 @@ int main(int argc, char** argv) {
     tokenize(&lex);
     // diagnostic prints 
     for (int i = 0; i < lex.token_count; i++) {
-        printf("Token %s at %d::%d of %d\n", 
+        printf("Token %s at %d::%d of type %s\n", 
                 lex.tokens[i].literal,
                 lex.tokens[i].line,
                 lex.tokens[i].column,
-                lex.tokens[i].type);
+                temp[lex.tokens[i].type]);
     }
     
+    printf("%d, %d\n", lex.token_count, lex.token_limit);
     error_handle(&lex);
     return 0;
 }
