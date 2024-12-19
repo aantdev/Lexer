@@ -48,3 +48,30 @@ char* ftostr(char *path){
     fclose(fptr);
     return final;
 }
+
+void error_handle(lexer* lex) {
+    if (lex->flag == UNSUPORTED_CHAR) {
+        fprintf(stderr, "Unsuported character, at line, col %d::%d\n", lex->line, lex->column);
+        close_lexer(lex);
+        exit(EXIT_FAILURE);
+    }
+
+    if (lex->flag == INIT_FAILURE) {
+        fprintf(stderr, "Could not init Lexer!\n");
+        close_lexer(lex);
+        exit(EXIT_FAILURE);
+    }
+
+    if (lex->flag == ADD_TOKEN_FAILURE) {
+        fprintf(stderr, "Could not add token!\n");
+        close_lexer(lex);
+
+        exit(EXIT_FAILURE);
+    }
+
+    if (lex->flag == SUCCESS_DONE) {
+        close_lexer(lex);
+        printf("Terminated with success.\n");
+        return;
+    }
+}

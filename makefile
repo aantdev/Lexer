@@ -28,4 +28,4 @@ clean:
 	rm -f $(BINARY) $(OBJECTS)
 
 run:
-	./lex
+	./lex ./test.txt

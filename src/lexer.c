@@ -6,9 +6,7 @@
 #include "lexer.h"
 #include "utils.h"
 
-int init_lexer(lexer* lexer, char* path) {
-    int success = 0;
-
+void init_lexer(lexer* lexer, char* path) {
     lexer->src = ftostr(path);
     lexer->current = 0;
     lexer->line = 0;
@@ -17,32 +15,62 @@ int init_lexer(lexer* lexer, char* path) {
     lexer->token_limit = MAX_TOKENS;
 
     // check if file_to_string succeeded first.
-    if (lexer->src == NULL)
-        return 1;
-    
+    if (lexer->src == NULL){
+        fprintf(stderr, "Failed to allocate source string!\n");
+        lexer->flag = INIT_FAILURE;
+        return;
+    }
     lexer->length = strlen(lexer->src);
     
     // if all is ok, then alloc some tokens
     lexer->tokens = malloc(sizeof(token) * MAX_TOKENS);
-    if (lexer->tokens == NULL)
-        return 1;
+    if (lexer->tokens == NULL) {
+        fprintf(stderr, "Failed to allocate tokens!\n");
+        lexer->flag = INIT_FAILURE;
+        return;
+    }
 
-    return success;
+    lexer->flag = SUCCESS_RUNNING;
 } 
 
 void close_lexer(lexer *lex) {
-    free(lex->tokens);
-    free(lex->src);
+    if (lex->tokens != NULL) {
+        for (int i = 0; i < lex->token_count; i++) {
+            if (lex->tokens[i].literal != NULL){
+                free(lex->tokens[i].literal);
+            }
+        }
+
+        free(lex->tokens);
+    } 
+    
+    if (lex->src != NULL)
+        free(lex->src);
 
     lex->src = NULL;
     lex->tokens = NULL;
 }
 
-int add_token(lexer *lex, int start, int length, t_type type) {
+void add_token(lexer *lex, int start, int length, t_type type) {
+
+    if (type == TOKEN_EOF) {
+        lex->tokens[lex->token_count].type = type;
+        lex->tokens = realloc(lex->tokens, lex->token_count);
+        if (lex->tokens == NULL) {
+            fprintf(stderr, "Realloc failed in add_token!\n");
+            lex->flag = ADD_TOKEN_FAILURE;
+            return;
+        }
+
+        lex->flag = SUCCESS_DONE;
+    }
+
     lex->tokens[lex->token_count].literal = malloc(length);
-    if (lex->tokens[lex->token_count].literal == NULL)
-        return 1;
-    
+    if (lex->tokens[lex->token_count].literal == NULL) {
+        lex->flag = ADD_TOKEN_FAILURE;
+        fprintf(stderr, "Failed to add token!\n");
+        return;
+    }
     memcpy(lex->tokens[lex->token_count].literal, lex->src + start, length-1); 
     lex->tokens[lex->token_count].literal[length-1] = '\0';
     
@@ -54,11 +82,14 @@ int add_token(lexer *lex, int start, int length, t_type type) {
     if (lex->token_count > lex->token_limit){
         lex->token_limit *= 2;
         lex->tokens = realloc(lex->tokens, sizeof(token) * lex->token_limit);
-        if (lex->tokens == NULL)
-            return 1;
+        if (lex->tokens == NULL) {
+            fprintf(stderr, "Realloc failed after reaching max tokens!\n");
+            lex->flag = ADD_TOKEN_FAILURE;
+            return;
+        }
     }
 
-    return 0;
+    lex->flag = SUCCESS_RUNNING;
 }
 
 void tokenize(lexer* lex) {
@@ -141,6 +172,9 @@ void tokenize(lexer* lex) {
             add_token(lex, start, length, TOKEN_KEYWORD);
             continue;
         }
-
     } 
+    
+    // // terminate tokens with EOF token
+    // add_token(lex, 0, 0, TOKEN_EOF);
+    lex->flag = SUCCESS_DONE;
 }

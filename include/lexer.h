@@ -4,6 +4,14 @@
 #define MAX_TOKENS 100
 
 typedef enum {
+    SUCCESS_RUNNING,
+    SUCCESS_DONE,
+    INIT_FAILURE,
+    ADD_TOKEN_FAILURE,
+    UNSUPORTED_CHAR
+} err_code;
+
+typedef enum {
     TOKEN_KEYWORD,
     TOKEN_NUMBER,
     TOKEN_SYMBOL,
@@ -27,12 +35,14 @@ typedef struct {
     int token_limit;
     int token_count;
     token* tokens;
+    
+    err_code flag;
 } lexer;
 
-int init_lexer(lexer* lex, char* path);
+void init_lexer(lexer* lex, char* path);
 void close_lexer(lexer* lex);
 
-int add_token(lexer* lex, int start, int length, t_type type);
+void add_token(lexer* lex, int start, int length, t_type type);
 void tokenize(lexer* lex);
 
 #endif
