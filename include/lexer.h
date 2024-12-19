@@ -1,7 +1,7 @@
 #ifndef LEXER_H 
 #define LEXER_H
 
-#define MAX_TOKENS 10
+#define MAX_TOKENS 128
 
 typedef enum {
     SUCCESS_RUNNING,
