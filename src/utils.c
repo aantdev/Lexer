@@ -1,4 +1,3 @@
-#define ARENA_IMPLEMENTATION
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>

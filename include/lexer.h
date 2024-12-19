@@ -5,7 +5,6 @@
 
 typedef enum {
     TOKEN_KEYWORD,
-    TOKEN_IDENTIFIER,
     TOKEN_NUMBER,
     TOKEN_SYMBOL,
     TOKEN_EOF
@@ -24,13 +23,16 @@ typedef struct {
     int current;
     int line;
     int column;
-
+    
+    int token_limit;
     int token_count;
     token* tokens;
 } lexer;
 
 int init_lexer(lexer* lex, char* path);
 void close_lexer(lexer* lex);
+
+int add_token(lexer* lex, int start, int length, t_type type);
 void tokenize(lexer* lex);
 
 #endif
